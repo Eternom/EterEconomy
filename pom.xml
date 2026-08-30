@@ -4,25 +4,32 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>net.etum</groupId>
-  <artifactId>EtumEconomy</artifactId>
+  <groupId>fr.eternom</groupId>
+  <artifactId>EterEconomy</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>EtumEconomy</name>
+  <name>EterEconomy</name>
 
   <properties>
-    <java.version>1.8</java.version>
+    <java.version>25</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <kotlin.version>1.9.21</kotlin.version>
   </properties>
 
   <build>
     <plugins>
-        <plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.15.0</version>
+        <configuration>
+          <release>${java.version}</release>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.4</version>
+        <version>3.6.2</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -32,63 +39,6 @@
           </execution>
         </executions>
       </plugin>
-        <plugin>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-maven-plugin</artifactId>
-            <version>${kotlin.version}</version>
-            <executions>
-                <execution>
-                    <id>compile</id>
-                    <phase>compile</phase>
-                    <goals>
-                        <goal>compile</goal>
-                    </goals>
-                </execution>
-                <execution>
-                    <id>test-compile</id>
-                    <phase>test-compile</phase>
-                    <goals>
-                        <goal>test-compile</goal>
-                    </goals>
-                </execution>
-            </executions>
-            <configuration>
-                <jvmTarget>1.8</jvmTarget>
-            </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.1</version>
-            <executions>
-                <execution>
-                    <id>default-compile</id>
-                    <phase>none</phase>
-                </execution>
-                <execution>
-                    <id>default-testCompile</id>
-                    <phase>none</phase>
-                </execution>
-                <execution>
-                    <id>compile</id>
-                    <phase>compile</phase>
-                    <goals>
-                        <goal>compile</goal>
-                    </goals>
-                </execution>
-                <execution>
-                    <id>testCompile</id>
-                    <phase>test-compile</phase>
-                    <goals>
-                        <goal>testCompile</goal>
-                    </goals>
-                </execution>
-            </executions>
-            <configuration>
-            <source>16</source>
-            <target>16</target>
-          </configuration>
-        </plugin>
     </plugins>
     <resources>
       <resource>
@@ -114,6 +64,11 @@
       </repository>
 
       <repository>
+          <id>placeholderapi</id>
+          <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+      </repository>
+
+      <repository>
           <id>central</id>
           <name>Maven Central</name>
           <layout>default</layout>
@@ -131,27 +86,46 @@
       <dependency>
           <groupId>io.papermc.paper</groupId>
           <artifactId>paper-api</artifactId>
-          <version>1.20.1-R0.1-SNAPSHOT</version>
+          <version>26.2.build.87-stable</version>
           <scope>provided</scope>
       </dependency>
 
       <dependency>
           <groupId>com.github.MilkBowl</groupId>
           <artifactId>VaultAPI</artifactId>
-          <version>1.7</version>
+          <version>1.7.1</version>
+          <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+          <groupId>me.clip</groupId>
+          <artifactId>placeholderapi</artifactId>
+          <version>2.11.6</version>
           <scope>provided</scope>
       </dependency>
 
       <dependency>
           <groupId>redis.clients</groupId>
           <artifactId>jedis</artifactId>
-          <version>5.0.2</version> <!-- Version actuelle de Jedis au moment de la rédaction -->
+          <version>6.0.0</version>
       </dependency>
 
       <dependency>
           <groupId>com.zaxxer</groupId>
           <artifactId>HikariCP</artifactId>
-          <version>4.0.3</version>
+          <version>6.3.0</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.xerial</groupId>
+          <artifactId>sqlite-jdbc</artifactId>
+          <version>3.47.1.0</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+          <version>42.7.4</version>
       </dependency>
 
   </dependencies>

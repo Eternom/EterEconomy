@@ -1,58 +1,136 @@
-# Redis Configuration
-# Configure the connection to your Redis server.
+# =====================================================
+#  EterEconomy configuration
+# =====================================================
+
+# Default language: the file name (without .yml) to use from the plugins/EterEconomy/lang/
+# folder, e.g. "en" -> lang/en.yml, "fr" -> lang/fr.yml. Used for console/non-player messages,
+# and as the fallback for any player whose client language isn't available as a lang file.
+# Players are otherwise served messages in their own client language automatically, if a
+# matching lang file exists - unless force-language below is enabled.
+language: "en"
+
+# Set to true to always use the "language" above for every player, ignoring each player's own
+# client language. Leave false to keep the automatic per-player detection.
+force-language: false
+
+# Economy: the player currency itself (Vault's Economy#getBalance/deposit/withdraw).
+economy:
+  # Name of one unit of currency, e.g. "You have 1 Helok".
+  currency-name-singular: "Helok"
+  # Name used for any other amount, e.g. "You have 12 Heloks".
+  currency-name-plural: "Heloks"
+  # Decimal places balances are rounded to. 0 = whole numbers only.
+  fractional-digits: 0
+  # Balance a player has the first time their account is seen (join, or an explicit
+  # account creation from another plugin through Vault).
+  starting-balance: 0.0
+  # How many entries "/eco top" shows.
+  top-list-size: 10
+
+# Bank: Vault's shared-account extension (createBank, bankDeposit, isBankMember, ...),
+# also usable in-game through "/bank".
+bank:
+  # Set to false to turn off bank accounts entirely: hasBankSupport() reports false to
+  # other plugins, and "/bank" tells players the feature is disabled.
+  enabled: true
+  # Balance a bank starts with when created.
+  starting-balance: 0.0
+  # Maximum number of banks a single player may own at once. 0 = unlimited.
+  max-banks-per-player: 0
+
+# Redis configuration.
+# Only read when storage.type is "redis" (also used as the bank store in that case).
 redis:
-  # Set the IP address or hostname of your Redis server.
+  # IP address or hostname of your Redis server.
   host: "localhost"
 
-  # Set the appropriate Redis port.
+  # Redis port.
   port: 6379
 
-  # Set the Redis password if required.
+  # Redis password, if required.
   password: "password"
 
-  # Set the Redis connection timeout in milliseconds.
+  # Connection timeout, in milliseconds.
   timeout: 2000
 
-# Storage Configuration
-# Specify the type of data storage (local or Redis).
+# Storage: where the live balance/bank data lives while the server runs.
 storage:
-  # Use "local" to store data locally, "redis" to store on a Redis server.
+  # "local" keeps everything in memory, backed by information_storage below.
+  # "redis" keeps everything in a shared Redis instance instead - the natural choice when
+  # several sub-servers need to see the same balances/banks live. Redis is only a live cache
+  # either way, never itself considered durable storage - see information_storage and backup
+  # below, which apply the same regardless of this setting.
   type: "local"
 
-# Information Storage Configuration
-# Specify the format for storing information (yaml or mysql).
+# Information storage: how balances/banks are durably persisted. Always active, regardless of
+# storage.type - this is what actually survives a crash or restart, including in "redis" mode.
 information_storage:
-  # Use "yaml" to store in a YAML file, "mysql" to store in MySQL.
+  # "yaml" stores one file per player under plugins/EterEconomy/data/, and a single
+  # banks.yml for bank accounts.
+  # "mysql" and "postgresql" store everything in the database configured below instead.
+  # "sqlite" stores everything in a single local database file, configured below - no external
+  # database server needed.
   format: "yaml"
 
-# MySQL Configuration
-# Configure the connection to your MySQL server.
+# MySQL configuration.
+# Only read when information_storage.format is "mysql".
 mysql:
-  # Set the IP address or hostname of your MySQL server.
+  # IP address or hostname of your MySQL server.
   host: "localhost"
 
-  # Set the appropriate MySQL port.
+  # MySQL port.
   port: 3306
 
-  # Set the MySQL username.
+  # MySQL username.
   user: "username"
 
-  # Set the MySQL password.
+  # MySQL password.
   password: "password"
 
-  # Set the name of the MySQL database.
+  # Name of the MySQL database.
   database: "database_name"
 
-# Bungee Configuration
+  # Size of the HikariCP connection pool.
+  pool-size: 10
+
+# PostgreSQL configuration.
+# Only read when information_storage.format is "postgresql".
+postgresql:
+  # IP address or hostname of your PostgreSQL server.
+  host: "localhost"
+
+  # PostgreSQL port.
+  port: 5432
+
+  # PostgreSQL username.
+  user: "username"
+
+  # PostgreSQL password.
+  password: "password"
+
+  # Name of the PostgreSQL database.
+  database: "database_name"
+
+  # Size of the HikariCP connection pool.
+  pool-size: 10
+
+# SQLite configuration.
+# Only read when information_storage.format is "sqlite".
+sqlite:
+  # Database file name, created under plugins/EterEconomy/data/ if missing.
+  file: "etereconomy.db"
+
+# Bungee configuration.
 bungee:
-  # Enable or disable BungeeCord connection verification.
-  # When enabled, the plugin checks if the player data is saved when leaving the server or the BungeeCord proxy.
-  enabled: false # Change to false if you don't want to enable BungeeCord connection verification
+  # Reserved for a future BungeeCord/Velocity connection check on join/quit.
+  # Currently has no effect.
+  enabled: false
 
-
-# Explanation:
-# - Redis: Configuration for the Redis server.
-# - Storage: Specifies the type of storage (local or Redis).
-# - Information Storage: Specifies the format for storing information (yaml or mysql).
-# - MySQL: Configuration for the MySQL server.
-# - Bungee: Configuration related to BungeeCord connection verification.
+# Backup: periodically flushes the live economy/bank data (in-memory or Redis) to the
+# persistent store. Runs regardless of storage.type - Redis is only a live cache, not durable
+# storage. This is the only thing that keeps bank data safe, since banks (unlike players)
+# have no join/quit event to save on.
+backup:
+  enabled: true
+  # How often, in minutes, the live data is flushed to the persistent store.
+  interval-minutes: 5
