@@ -1,8 +1,7 @@
 package fr.eternom.etereconomy.module.economy.event;
 
-import fr.eternom.etereconomy.helper.config.ConfigManager;
-import fr.eternom.etereconomy.helper.config.StorageType;
 import fr.eternom.etereconomy.helper.storage.BalanceStore;
+import fr.eternom.etereconomy.module.bank.BankManager;
 import fr.eternom.etereconomy.module.economy.EconomyManager;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -15,32 +14,33 @@ import java.util.UUID;
 
 /**
  * Keeps the live store in sync with the durable one: loads the persisted balance into memory on
- * join (LOCAL storage only - in REDIS mode the live value already wins and shouldn't be
- * clobbered by a stale snapshot), and flushes it back on quit. Persistent-store I/O always runs
- * off the main thread.
+ * join if it isn't live yet (in REDIS mode a fresher value shared by another sub-server already
+ * wins and is never clobbered by a stale snapshot - see {@link BankManager}'s startup load for
+ * the same pattern), and flushes it back on quit. Persistent-store I/O always runs off the main
+ * thread.
  */
 public class ConnectionListener implements Listener {
 
     private final Plugin plugin;
-    private final ConfigManager config;
     private final EconomyManager economyManager;
 
-    public ConnectionListener(Plugin plugin, ConfigManager config, EconomyManager economyManager) {
+    public ConnectionListener(Plugin plugin, EconomyManager economyManager) {
         this.plugin = plugin;
-        this.config = config;
         this.economyManager = economyManager;
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        if (config.getStorageType() != StorageType.LOCAL) {
-            return;
-        }
-
         UUID uuid = event.getPlayer().getUniqueId();
         BalanceStore liveStore = economyManager.getLiveStore();
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            // Already live (e.g. a shared Redis store already has this player's balance) - don't
+            // clobber it with a persisted snapshot that could be stale.
+            if (liveStore.hasAccount(uuid)) {
+                return;
+            }
+
             double balance = economyManager.getPersistedOrStartingBalance(uuid);
             Bukkit.getScheduler().runTask(plugin, () -> liveStore.setBalance(uuid, balance));
         });

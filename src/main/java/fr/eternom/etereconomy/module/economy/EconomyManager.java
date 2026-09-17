@@ -16,6 +16,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,8 +34,12 @@ import java.util.stream.Collectors;
  */
 public class EconomyManager implements Economy, Module {
 
+    // Rank lookups (e.g. the %etereconomy_rank% placeholder) must return instantly on whatever
+    // thread calls them, so the full-store scan behind a rank is precomputed on this interval
+    // instead of running per request.
+    private static final long RANK_CACHE_REFRESH_TICKS = 600L;
+
     private final JavaPlugin plugin;
-    private final ConfigManager config;
     private final MessageManager messages;
     private final BalanceStore liveStore;
     private final BalanceStore persistentStore;
@@ -47,9 +52,11 @@ public class EconomyManager implements Economy, Module {
     private final int topListSize;
     private final boolean bankEnabled;
 
+    private volatile Map<UUID, Integer> rankCache = Map.of();
+    private BukkitTask rankCacheTask;
+
     public EconomyManager(JavaPlugin plugin, ConfigManager config, MessageManager messages, BankManager bankManager) {
         this.plugin = plugin;
-        this.config = config;
         this.messages = messages;
         this.liveStore = StoreFactory.liveBalanceStore(config);
         this.persistentStore = StoreFactory.persistentBalanceStore(config);
@@ -74,11 +81,16 @@ public class EconomyManager implements Economy, Module {
 
         Objects.requireNonNull(plugin.getCommand("eco")).setExecutor(new CommandEco(plugin, economy, this, messages));
 
-        Bukkit.getPluginManager().registerEvents(new ConnectionListener(plugin, config, this), plugin);
+        Bukkit.getPluginManager().registerEvents(new ConnectionListener(plugin, this), plugin);
+
+        rankCacheTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::refreshRankCache, 0L, RANK_CACHE_REFRESH_TICKS);
     }
 
     @Override
     public void disable() {
+        if (rankCacheTask != null) {
+            rankCacheTask.cancel();
+        }
         liveStore.close();
         persistentStore.close();
     }
@@ -111,14 +123,27 @@ public class EconomyManager implements Economy, Module {
                 .collect(Collectors.toList());
     }
 
-    /** 1-based rank across the full balance list, or -1 if the player has no recorded balance. */
+    /**
+     * 1-based rank across the full balance list, or -1 if the player has no recorded balance.
+     * Reads a cache refreshed every {@link #RANK_CACHE_REFRESH_TICKS} off the main thread - see
+     * {@link #refreshRankCache()} - instead of scanning the persistent store per call, since this
+     * backs a placeholder that must return synchronously on whatever thread requests it.
+     */
     public int getRank(UUID uuid) {
+        return rankCache.getOrDefault(uuid, -1);
+    }
+
+    private void refreshRankCache() {
         List<UUID> ranked = mergedBalances().entrySet().stream()
                 .sorted(Map.Entry.<UUID, Double>comparingByValue().reversed())
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
-        int index = ranked.indexOf(uuid);
-        return index >= 0 ? index + 1 : -1;
+
+        Map<UUID, Integer> ranks = new HashMap<>();
+        for (int i = 0; i < ranked.size(); i++) {
+            ranks.put(ranked.get(i), i + 1);
+        }
+        rankCache = ranks;
     }
 
     private Map<UUID, Double> mergedBalances() {
