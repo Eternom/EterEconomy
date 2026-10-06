@@ -1,32 +1,9 @@
 name: EterEconomy
-version: '${project.version}'
-main: fr.eternom.etereconomy.Main
+version: '${version}'
+
+main: fr.eternom.eterEconomy.Main
 api-version: '26.2'
-description: Manage player economy in your server with EterEconomy.
-author: JanjeVuk
-website: 'https://example.com'
-loadbefore:
-  - EtumAtrium
-softdepend:
-  - PlaceholderAPI
-commands:
-  eco:
-    description: Main command for EterEconomy
-    usage: /<command> [args]
-    permission: etereconomy.command.eco
-    aliases:
-      - economy
-  bank:
-    description: Manage shared bank accounts
-    usage: /<command> <create/delete/balance/deposit/withdraw/invite/kick/list> [args]
-    permission: etereconomy.command.bank
-permissions:
-  etereconomy.command.eco:
-    description: Allows access to the main EterEconomy command
-    default: op
-  etereconomy.command.bank:
-    description: Allows access to the bank command
-    default: true
-  etereconomy.command.bank.admin:
-    description: Allows managing any bank regardless of ownership
-    default: op
+load: POSTWORLD
+authors: [ NadTum, JanjeVuk ]
+description: Économie du réseau (soldes et banques), fournie à Vault. Commandes dans EterEssential.
+depend: [EterLib, Vault]

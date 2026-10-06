@@ -1,136 +1,25 @@
-# =====================================================
-#  EterEconomy configuration
-# =====================================================
+# ============================================================
+#  EterEconomy
+# ============================================================
+#
+#  L'économie du réseau, fournie à Vault : tous les plugins (EterEssential pour
+#  /money et /pay, EterTab pour la sidebar, boutiques...) passent par elle.
+#  Aucune commande ici. Base de données et Redis : EterLib/config.yml.
+#  Les soldes sont en base (etereconomy_balances), commune à tous les serveurs.
+#  Toute modification nécessite un redémarrage du serveur.
 
-# Default language: the file name (without .yml) to use from the plugins/EterEconomy/lang/
-# folder, e.g. "en" -> lang/en.yml, "fr" -> lang/fr.yml. Used for console/non-player messages,
-# and as the fallback for any player whose client language isn't available as a lang file.
-# Players are otherwise served messages in their own client language automatically, if a
-# matching lang file exists - unless force-language below is enabled.
-language: "en"
-
-# Set to true to always use the "language" above for every player, ignoring each player's own
-# client language. Leave false to keep the automatic per-player detection.
-force-language: false
-
-# Economy: the player currency itself (Vault's Economy#getBalance/deposit/withdraw).
-economy:
-  # Name of one unit of currency, e.g. "You have 1 Helok".
-  currency-name-singular: "Helok"
-  # Name used for any other amount, e.g. "You have 12 Heloks".
-  currency-name-plural: "Heloks"
-  # Decimal places balances are rounded to. 0 = whole numbers only.
+currency:
+  # Nom de la monnaie : "1 Helok", "12 Heloks".
+  name-singular: "Helok"
+  name-plural: "Heloks"
+  # Nombre de décimales (0 = nombres entiers seulement, 4 au maximum).
+  # À ne pas changer une fois le serveur ouvert.
   fractional-digits: 0
-  # Balance a player has the first time their account is seen (join, or an explicit
-  # account creation from another plugin through Vault).
-  starting-balance: 0.0
-  # How many entries "/eco top" shows.
-  top-list-size: 10
+  # Solde d'un joueur la première fois qu'il est vu.
+  starting-balance: 0
 
-# Bank: Vault's shared-account extension (createBank, bankDeposit, isBankMember, ...),
-# also usable in-game through "/bank".
-bank:
-  # Set to false to turn off bank accounts entirely: hasBankSupport() reports false to
-  # other plugins, and "/bank" tells players the feature is disabled.
+# Comptes partagés de Vault (createBank, bankDeposit...), utilisés par d'autres plugins.
+banks:
   enabled: true
-  # Balance a bank starts with when created.
-  starting-balance: 0.0
-  # Maximum number of banks a single player may own at once. 0 = unlimited.
-  max-banks-per-player: 0
-
-# Redis configuration.
-# Only read when storage.type is "redis" (also used as the bank store in that case).
-redis:
-  # IP address or hostname of your Redis server.
-  host: "localhost"
-
-  # Redis port.
-  port: 6379
-
-  # Redis password, if required.
-  password: "password"
-
-  # Connection timeout, in milliseconds.
-  timeout: 2000
-
-# Storage: where the live balance/bank data lives while the server runs.
-storage:
-  # "local" keeps everything in memory, backed by information_storage below.
-  # "redis" keeps everything in a shared Redis instance instead - the natural choice when
-  # several sub-servers need to see the same balances/banks live. Redis is only a live cache
-  # either way, never itself considered durable storage - see information_storage and backup
-  # below, which apply the same regardless of this setting.
-  type: "local"
-
-# Information storage: how balances/banks are durably persisted. Always active, regardless of
-# storage.type - this is what actually survives a crash or restart, including in "redis" mode.
-information_storage:
-  # "yaml" stores one file per player under plugins/EterEconomy/data/, and a single
-  # banks.yml for bank accounts.
-  # "mysql" and "postgresql" store everything in the database configured below instead.
-  # "sqlite" stores everything in a single local database file, configured below - no external
-  # database server needed.
-  format: "yaml"
-
-# MySQL configuration.
-# Only read when information_storage.format is "mysql".
-mysql:
-  # IP address or hostname of your MySQL server.
-  host: "localhost"
-
-  # MySQL port.
-  port: 3306
-
-  # MySQL username.
-  user: "username"
-
-  # MySQL password.
-  password: "password"
-
-  # Name of the MySQL database.
-  database: "database_name"
-
-  # Size of the HikariCP connection pool.
-  pool-size: 10
-
-# PostgreSQL configuration.
-# Only read when information_storage.format is "postgresql".
-postgresql:
-  # IP address or hostname of your PostgreSQL server.
-  host: "localhost"
-
-  # PostgreSQL port.
-  port: 5432
-
-  # PostgreSQL username.
-  user: "username"
-
-  # PostgreSQL password.
-  password: "password"
-
-  # Name of the PostgreSQL database.
-  database: "database_name"
-
-  # Size of the HikariCP connection pool.
-  pool-size: 10
-
-# SQLite configuration.
-# Only read when information_storage.format is "sqlite".
-sqlite:
-  # Database file name, created under plugins/EterEconomy/data/ if missing.
-  file: "etereconomy.db"
-
-# Bungee configuration.
-bungee:
-  # Reserved for a future BungeeCord/Velocity connection check on join/quit.
-  # Currently has no effect.
-  enabled: false
-
-# Backup: periodically flushes the live economy/bank data (in-memory or Redis) to the
-# persistent store. Runs regardless of storage.type - Redis is only a live cache, not durable
-# storage. This is the only thing that keeps bank data safe, since banks (unlike players)
-# have no join/quit event to save on.
-backup:
-  enabled: true
-  # How often, in minutes, the live data is flushed to the persistent store.
-  interval-minutes: 5
+  # Solde d'une banque à sa création.
+  starting-balance: 0
