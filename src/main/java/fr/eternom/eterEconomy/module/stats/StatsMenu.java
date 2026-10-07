@@ -3,6 +3,7 @@ package fr.eternom.eterEconomy.module.stats;
 import fr.eternom.eterEconomy.module.history.EconomyStats.SourceTotal;
 import fr.eternom.eterEconomy.module.history.EconomyStats.Supply;
 import fr.eternom.eterEconomy.module.stats.StatsGui.Overview;
+import fr.eternom.eterLib.helper.gui.Frame;
 import fr.eternom.eterLib.helper.gui.Items;
 import fr.eternom.eterLib.helper.gui.Menu;
 import fr.eternom.eterLib.helper.gui.Sounds;
@@ -18,7 +19,6 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Menu /ecostats, 6 lignes :
@@ -41,7 +41,6 @@ class StatsMenu implements Menu {
     private static final int SUPPLY = 48;
     private static final int BACK = 49;
     private static final int RICHEST = 50;
-    private static final Set<Integer> ACCENT_FRAME = Set.of(0, 1, 7, 8, 9, 17, 36, 44, 45, 46, 52, 53);
 
     private final StatsGui gui;
     private final Messages messages;
@@ -81,15 +80,7 @@ class StatsMenu implements Menu {
     }
 
     private void render() {
-        ItemStack accent = Items.pane(Material.ORANGE_STAINED_GLASS_PANE);
-        ItemStack neutral = Items.pane(Material.GRAY_STAINED_GLASS_PANE);
-        for (int slot = 0; slot < inventory.getSize(); slot++) {
-            int row = slot / 9;
-            int column = slot % 9;
-            if (row == 0 || row == 5 || column == 0 || column == 8) {
-                inventory.setItem(slot, ACCENT_FRAME.contains(slot) ? accent : neutral);
-            }
-        }
+        Frame.draw(inventory, Material.ORANGE_STAINED_GLASS_PANE);
         inventory.setItem(SUMMARY, summary());
         PERIODS.forEach((slot, days) -> inventory.setItem(slot, Items.item(Material.CLOCK,
                 text("stats.period." + days), List.of(text(days == overview.days() ? "stats.period.selected" : "stats.period.click")),

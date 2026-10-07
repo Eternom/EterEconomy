@@ -7,7 +7,7 @@ plugin compatible Vault (boutiques...) fonctionne aussi. Document développeur, 
 
 ## Prérequis
 
-- **EterLib 1.5.0+** (`depend`) : base de données, Redis (facultatif) et joueurs du réseau.
+- **EterLib 1.6.0+** (`depend`, textes communs, cadre des menus, bus réseau, `Money`) : base de données, Redis (facultatif) et joueurs du réseau.
 - **Vault** (`depend`). EterEconomy s'enregistre avec la priorité haute : il l'emporte sur l'économie d'un autre
   plugin (Essentials...) installé en même temps.
 

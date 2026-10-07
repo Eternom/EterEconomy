@@ -1,6 +1,7 @@
 package fr.eternom.eterEconomy.module.stats;
 
 import fr.eternom.eterEconomy.module.history.EconomyStats.Supply;
+import fr.eternom.eterLib.helper.gui.Frame;
 import fr.eternom.eterLib.helper.gui.Items;
 import fr.eternom.eterLib.helper.gui.Menu;
 import fr.eternom.eterLib.helper.gui.Sounds;
@@ -11,7 +12,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,12 +35,7 @@ class SupplyMenu implements Menu {
         this.messages = gui.messages();
         this.viewer = viewer;
         this.inventory = Bukkit.createInventory(this, 54, text("stats.supply.title"));
-        ItemStack neutral = Items.pane(Material.GRAY_STAINED_GLASS_PANE);
-        for (int slot = 0; slot < inventory.getSize(); slot++) {
-            if (slot / 9 == 0 || slot / 9 == 5 || slot % 9 == 0 || slot % 9 == 8) {
-                inventory.setItem(slot, neutral);
-            }
-        }
+        Frame.draw(inventory, Material.ORANGE_STAINED_GLASS_PANE);
         for (int i = 0; i < history.size() && i < SIZE; i++) {
             Supply day = history.get(i);
             Supply previous = i + 1 < history.size() ? history.get(i + 1) : null;

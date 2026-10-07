@@ -26,8 +26,8 @@ import java.time.ZoneId;
  */
 public final class Main extends JavaPlugin {
 
-    /** Version minimale d'EterLib : menus avec bouton Retour/Fermer depuis 1.5.1. */
-    private static final String REQUIRED_ETERLIB = "1.5.1";
+    /** Version minimale d'EterLib : textes communs et outils partagés (Frame, Money, NetworkBus) depuis 1.6.0. */
+    private static final String REQUIRED_ETERLIB = "1.6.0";
 
     /** Préfixe des tables d'EterEconomy dans la base commune : etereconomy_balances, etereconomy_transactions... */
     private static final String TABLE_PREFIX = "etereconomy_";
