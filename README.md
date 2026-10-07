@@ -64,39 +64,35 @@ en détruit), la masse jour par jour sur 28 jours, les 28 plus riches (fortune a
 
 ## Repères économiques
 
-Grille de départ pour régler tous les prix et récompenses (EterReward, futur EterMarket). À ajuster avec `/ecostats`.
+Grille pour régler tous les prix et récompenses (EterMarket, EterReward). À ajuster avec `/ecostats`.
 
-**Principe** : l'argent entre par des **robinets** (récompenses, ventes au serveur, métiers) et sort par des **éviers**
-(achats au serveur, taxes). Si les robinets l'emportent durablement, la masse monétaire gonfle : les prix entre
-joueurs s'envolent et les récompenses ne valent plus rien (inflation). Objectif : une masse qui ne monte que
-doucement, au rythme des nouveaux joueurs.
+**Principe** : l'argent entre par des **robinets** et sort par des **éviers**. Si les robinets l'emportent
+durablement, la masse monétaire gonfle : les prix entre joueurs s'envolent et les récompenses ne valent plus rien
+(inflation). Objectif : une masse qui ne monte que doucement, au rythme des nouveaux joueurs.
 
-**Unité de référence** : un joueur actif gagne environ **1 000 Heloks par heure de jeu** en milieu de partie
-(environ 400 au début). Tout le reste se déduit de ce chiffre.
+**Le robinet principal : les quêtes de la guilde des métiers** (EterMarket). Les boutiques du serveur **ne rachètent
+rien** : on ne gagne de l'argent qu'en livrant ses quêtes du jour au PNJ de son métier. Le robinet est donc fermé et
+mesurable : un nombre fixe de quêtes par joueur et par jour.
 
-**Rachat par le serveur** (ce que les boutiques du serveur paient, par unité) :
+| Repère | Valeur |
+|---|---|
+| Une quête | **150 à 250 Heloks**, pour environ 15 à 20 minutes de jeu |
+| Par jour | 3 quêtes + 1 bonus (× 1,5) : **800 Heloks au plus** |
+| Par semaine, joueur très assidu | environ **5 600 Heloks** |
+| Changer de métier | **2 000 Heloks** (évier), une fois par semaine au plus |
 
-| Ressource | Heloks | Ressource | Heloks |
-|---|---|---|---|
-| Blé, carotte, pomme de terre | 1 | Charbon | 3 |
-| Pain | 3 | Lingot de cuivre | 2 |
-| Viande cuite | 4 | Lingot de fer | 10 |
-| Redstone | 2 | Lingot d'or | 12 |
-| Lapis-lazuli | 4 | Quartz | 3 |
-| Émeraude | 50 | Diamant | 80 |
-| Débris antique | 400 | Lingot de netherite | 2 000 |
+**Les éviers** :
+- **les boutiques des PNJ**, qui ne font que vendre ;
+- **l'hôtel des ventes** : 5 % de taxe sur chaque vente et 1 % de frais de mise en vente, non remboursés ;
+- **le changement de métier**.
 
-Blocs de construction (terre, pierre, bois) : **pas rachetés**, pour éviter les fermes automatiques qui impriment de
-l'argent.
+**La règle d'or des prix en boutique** : le prix **à l'unité** d'un objet en boutique doit toujours être **supérieur**
+à ce que sa livraison rapporte à l'unité. Sinon, on l'achète pour le livrer, et on imprime de l'argent sans fin.
+Les éditeurs d'EterMarket l'affichent en rouge (⚠) quand ce n'est pas le cas. Exemple : une quête de 64 charbons à
+150 Heloks rapporte 2,34 par charbon, donc la boutique doit le vendre plus cher que 2,34 l'unité.
 
-**Vente par le serveur** : **4 × le prix de rachat**. L'écart est le principal évier.
-
-**Hôtel des ventes** : taxe de **5 %** sur chaque vente, et frais de mise en vente de **1 %**, non remboursés. Ce sont
-des éviers, qui freinent aussi la spéculation.
-
-**Récompenses gratuites** (`/daily`, votes…) : au plus **environ 10 % du gain d'un joueur actif**. Avec environ
-10 heures de jeu par semaine, soit 10 000 Heloks, un cycle de `/daily` vaut **1 000 à 1 400 Heloks**, objets compris
-(valeur au prix de rachat).
+**Les récompenses gratuites** (`/daily`, votes…) : au plus **environ 10 % du revenu** d'un joueur assidu, soit un cycle
+de `/daily` d'environ **600 à 750 Heloks**, objets compris.
 
 **Signaux d'alerte dans `/ecostats`** :
 - une masse monétaire qui monte de plus de **5 % par jour** pendant plusieurs jours : il faut réduire les robinets ou
