@@ -1,0 +1,56 @@
+# Messages d'EterEconomy, format MiniMessage : https://docs.advntr.dev/minimessage/format
+# Balises de la palette (EterLib/config.yml > language.colors) : <primary> <accent> <info> <error> <success>
+#   <info> = texte courant gris clair, <accent> = mots importants en orange.
+# Les valeurs entre <> comme <amount> sont remplies par le plugin. Pour afficher un "<", écrire \< entre 'guillemets simples'.
+# Une clé absente reprend le texte intégré au plugin : tu peux ne garder que les lignes que tu modifies.
+# Le préfixe des messages (« Core ») est commun à tous les plugins : EterLib/config.yml > language.prefix.
+
+command:
+  players-only: "<error>Commande réservée aux joueurs."
+
+error:
+  generic: "<error>Une erreur est survenue, réessaie plus tard."
+
+stats:
+  title: "<primary>Économie du réseau"
+  back: "<accent>« Retour"
+  period:
+    '1': "<accent>Aujourd'hui"
+    '7': "<accent>7 derniers jours"
+    '30': "<accent>30 derniers jours"
+    selected: "<success>● <info>Période affichée"
+    click: "<accent>Clic <dark_gray>· <info>afficher cette période"
+  summary:
+    name: "<primary>Masse monétaire : <accent><amount>"
+    accounts: "<dark_gray>▸ <info>Comptes : <accent><count>"
+    change-day: "<dark_gray>▸ <info>Sur 24 h : <accent><amount>"
+    change-week: "<dark_gray>▸ <info>Sur 7 jours : <accent><amount>"
+    unknown: "pas encore de relevé"
+    period: "<info>Sur la période (<accent><period></accent>) :"
+    created: "<dark_gray>▸ <info>Créé : <success><amount>"
+    destroyed: "<dark_gray>▸ <info>Détruit : <error><amount>"
+    net-up: "<dark_gray>▸ <info>Bilan : <success><amount></success> <dark_gray>(la masse monte)"
+    net-down: "<dark_gray>▸ <info>Bilan : <error><amount></error> <dark_gray>(la masse baisse)"
+  source:
+    name: "<accent><source>"
+    none: "<info>Aucun mouvement sur cette période"
+    created: "<dark_gray>▸ <info>Créé : <success><amount>"
+    destroyed: "<dark_gray>▸ <info>Détruit : <error><amount>"
+    operations: "<dark_gray>▸ <info>Opérations : <accent><count>"
+    faucet: "<success>● <info>Crée de l'argent : <success><amount>"
+    sink: "<error>● <info>Détruit de l'argent : <error><amount>"
+    neutral: "<dark_gray>● <info>Neutre (l'argent change de main)"
+  supply:
+    button: "<accent>Masse jour par jour"
+    button-lore: "<info>Les 28 derniers relevés"
+    title: "<primary>Masse monétaire, jour par jour"
+    day: "<accent><date></accent> <dark_gray>· <info><amount>"
+    accounts: "<dark_gray>▸ <info>Comptes : <accent><count>"
+    change: "<dark_gray>▸ <info>Depuis la veille : <accent><amount>"
+  richest:
+    button: "<accent>Les plus riches"
+    button-lore: "<info>Repérer une fortune anormale"
+    title: "<primary>Les plus riches"
+    player: "<accent>#<rank></accent> <white><player>"
+    balance: "<dark_gray>▸ <info>Solde : <accent><amount>"
+    share: "<dark_gray>▸ <info>Part du classement : <accent><share> %"

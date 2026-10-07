@@ -1,8 +1,9 @@
 # EterEconomy
 
-L'économie du réseau, fournie à **Vault** : soldes des joueurs et comptes partagés (banques de Vault). **Aucune
-commande** : `/money`, `/pay` et `/eco` sont dans EterEssential, la sidebar d'EterTab lit Vault ; tout autre plugin
-compatible Vault (boutiques...) fonctionne aussi. Document développeur, à tenir à jour avec le code.
+L'économie du réseau, fournie à **Vault** : soldes des joueurs et comptes partagés (banques de Vault), plus un
+**journal de chaque mouvement** et un tableau de bord admin (`/ecostats`) pour suivre l'équilibre. **Aucune commande
+pour les joueurs** : `/money`, `/pay` et `/eco` sont dans EterEssential, la sidebar d'EterTab lit Vault ; tout autre
+plugin compatible Vault (boutiques...) fonctionne aussi. Document développeur, à tenir à jour avec le code.
 
 ## Prérequis
 
@@ -42,3 +43,63 @@ copie « vivante » en mémoire et ses sauvegardes périodiques (inutiles quand 
 commandes `/eco` et `/bank` (les commandes vont dans EterEssential) et les variables PlaceholderAPI (l'extension
 Vault de PlaceholderAPI donne `%vault_eco_balance%`). Les anciennes tables `eter_balances`, `eter_banks`,
 `eter_bank_members` et les clés Redis `balances`, `banks`, `bank:*` ne sont plus utilisées.
+
+## Journal et statistiques (2.1.0)
+
+**Journal** (`module/history/TransactionLog`, table `etereconomy_transactions`) : chaque mouvement réussi (joueur ou
+banque) avec montant signé, solde après, **source** et serveur. La source est le plugin qui a appelé Vault, trouvé
+dans la pile d'appels (`JavaPlugin#getProvidingPlugin`, mis en cache par classe) : EterReward, EterEssential... ;
+« Serveur » si aucun plugin. Chaque mouvement s'ajoute aussi aux totaux du jour par source (`etereconomy_daily` :
+créé, détruit, opérations ; ajout atomique). Un `/pay` est un retrait puis un dépôt : net nul pour sa source.
+
+**Entretien** (`HistoryMaintenance`, toutes les heures en tâche de fond) : relevé de la masse monétaire du jour
+(`etereconomy_supply`, joueurs + banques) ; une fois par jour, sur le seul serveur qui réserve la tâche
+(`etereconomy_jobs`, `INSERT IGNORE`), les transactions de plus de `history.retention-days` (365) sont **archivées**
+dans `plugins/EterEconomy/archives/*.csv.gz` puis supprimées. Archive impossible = rien n'est supprimé. Totaux par
+jour et relevés sont gardés pour toujours (quelques lignes par jour).
+
+**`/ecostats`** (`etereconomy.stats`, op) : masse monétaire et ses variations sur 24 h et 7 jours, totaux créés et
+détruits sur la période (aujourd'hui, 7 ou 30 jours), chaque source (émeraude : elle crée de l'argent, redstone : elle
+en détruit), la masse jour par jour sur 28 jours, les 28 plus riches (fortune anormale = faille ou duplication).
+
+## Repères économiques
+
+Grille de départ pour régler tous les prix et récompenses (EterReward, futur EterMarket). À ajuster avec `/ecostats`.
+
+**Principe** : l'argent entre par des **robinets** (récompenses, ventes au serveur, métiers) et sort par des **éviers**
+(achats au serveur, taxes). Si les robinets l'emportent durablement, la masse monétaire gonfle : les prix entre
+joueurs s'envolent et les récompenses ne valent plus rien (inflation). Objectif : une masse qui ne monte que
+doucement, au rythme des nouveaux joueurs.
+
+**Unité de référence** : un joueur actif gagne environ **1 000 Heloks par heure de jeu** en milieu de partie
+(environ 400 au début). Tout le reste se déduit de ce chiffre.
+
+**Rachat par le serveur** (ce que les boutiques du serveur paient, par unité) :
+
+| Ressource | Heloks | Ressource | Heloks |
+|---|---|---|---|
+| Blé, carotte, pomme de terre | 1 | Charbon | 3 |
+| Pain | 3 | Lingot de cuivre | 2 |
+| Viande cuite | 4 | Lingot de fer | 10 |
+| Redstone | 2 | Lingot d'or | 12 |
+| Lapis-lazuli | 4 | Quartz | 3 |
+| Émeraude | 50 | Diamant | 80 |
+| Débris antique | 400 | Lingot de netherite | 2 000 |
+
+Blocs de construction (terre, pierre, bois) : **pas rachetés**, pour éviter les fermes automatiques qui impriment de
+l'argent.
+
+**Vente par le serveur** : **4 × le prix de rachat**. L'écart est le principal évier.
+
+**Hôtel des ventes** : taxe de **5 %** sur chaque vente, et frais de mise en vente de **1 %**, non remboursés. Ce sont
+des éviers, qui freinent aussi la spéculation.
+
+**Récompenses gratuites** (`/daily`, votes…) : au plus **environ 10 % du gain d'un joueur actif**. Avec environ
+10 heures de jeu par semaine, soit 10 000 Heloks, un cycle de `/daily` vaut **1 000 à 1 400 Heloks**, objets compris
+(valeur au prix de rachat).
+
+**Signaux d'alerte dans `/ecostats`** :
+- une masse monétaire qui monte de plus de **5 % par jour** pendant plusieurs jours : il faut réduire les robinets ou
+  ajouter des éviers (taxes, coût de services comme `/rtp`, réparations) ;
+- une source qui crée beaucoup plus que prévu : prix mal réglé ou faille ;
+- un joueur qui pèse une part démesurée du classement des plus riches : à vérifier.

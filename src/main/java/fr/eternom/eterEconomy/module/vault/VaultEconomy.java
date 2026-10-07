@@ -2,6 +2,7 @@ package fr.eternom.eterEconomy.module.vault;
 
 import fr.eternom.eterEconomy.module.account.AccountRepository;
 import fr.eternom.eterEconomy.module.bank.BankRepository;
+import fr.eternom.eterEconomy.module.history.TransactionLog;
 import fr.eternom.eterLib.module.player.PlayerDirectory;
 import fr.eternom.eterLib.module.player.PlayerDirectory.NetworkPlayer;
 import net.milkbowl.vault.economy.Economy;
@@ -23,7 +24,8 @@ import java.util.UUID;
  * Chaque appel va directement en base (voir {@link AccountRepository}) : à appeler hors du thread principal, comme le
  * font les plugins Eter. Les montants sont arrondis aux décimales de la monnaie ; un montant négatif ou invalide est
  * refusé. Le monde est ignoré (une seule économie pour tout le réseau). Les variantes par pseudo retrouvent le joueur
- * dans eter_players (n'importe quel joueur déjà venu sur le réseau).
+ * dans eter_players (n'importe quel joueur déjà venu sur le réseau). Chaque mouvement réussi est journalisé
+ * ({@link TransactionLog}).
  */
 @SuppressWarnings("deprecation") // Vault impose aussi ses anciennes signatures (pseudo, monde)
 public class VaultEconomy implements Economy {
@@ -34,15 +36,17 @@ public class VaultEconomy implements Economy {
     private final AccountRepository accounts;
     private final BankRepository banks; // null si les banques sont désactivées
     private final PlayerDirectory directory;
+    private final TransactionLog log;
     private final String singular;
     private final String plural;
     private final int fractionalDigits;
 
-    public VaultEconomy(AccountRepository accounts, BankRepository banks, PlayerDirectory directory, String singular,
-                        String plural, int fractionalDigits) {
+    public VaultEconomy(AccountRepository accounts, BankRepository banks, PlayerDirectory directory, TransactionLog log,
+                        String singular, String plural, int fractionalDigits) {
         this.accounts = accounts;
         this.banks = banks;
         this.directory = directory;
+        this.log = log;
         this.singular = singular;
         this.plural = plural;
         this.fractionalDigits = fractionalDigits;
@@ -112,9 +116,11 @@ public class VaultEconomy implements Economy {
         }
         UUID uuid = player.getUniqueId();
         OptionalDouble balance = accounts.withdraw(uuid, rounded);
-        return balance.isPresent()
-                ? new EconomyResponse(rounded, balance.getAsDouble(), ResponseType.SUCCESS, null)
-                : new EconomyResponse(0, accounts.balance(uuid), ResponseType.FAILURE, "Insufficient funds");
+        if (balance.isEmpty()) {
+            return new EconomyResponse(0, accounts.balance(uuid), ResponseType.FAILURE, "Insufficient funds");
+        }
+        log.player(uuid, -rounded, balance.getAsDouble());
+        return new EconomyResponse(rounded, balance.getAsDouble(), ResponseType.SUCCESS, null);
     }
 
     @Override
@@ -123,7 +129,9 @@ public class VaultEconomy implements Economy {
         if (rounded < 0) {
             return failure(INVALID_AMOUNT);
         }
-        return new EconomyResponse(rounded, accounts.deposit(player.getUniqueId(), rounded), ResponseType.SUCCESS, null);
+        double balance = accounts.deposit(player.getUniqueId(), rounded);
+        log.player(player.getUniqueId(), rounded, balance);
+        return new EconomyResponse(rounded, balance, ResponseType.SUCCESS, null);
     }
 
     @Override
@@ -183,9 +191,11 @@ public class VaultEconomy implements Economy {
             return failure(INVALID_AMOUNT);
         }
         OptionalDouble balance = banks.withdraw(name, rounded);
-        return balance.isPresent()
-                ? new EconomyResponse(rounded, balance.getAsDouble(), ResponseType.SUCCESS, null)
-                : failure("Unknown bank or insufficient funds");
+        if (balance.isEmpty()) {
+            return failure("Unknown bank or insufficient funds");
+        }
+        log.bank(name, -rounded, balance.getAsDouble());
+        return new EconomyResponse(rounded, balance.getAsDouble(), ResponseType.SUCCESS, null);
     }
 
     @Override
@@ -198,9 +208,11 @@ public class VaultEconomy implements Economy {
             return failure(INVALID_AMOUNT);
         }
         OptionalDouble balance = banks.deposit(name, rounded);
-        return balance.isPresent()
-                ? new EconomyResponse(rounded, balance.getAsDouble(), ResponseType.SUCCESS, null)
-                : failure("Unknown bank");
+        if (balance.isEmpty()) {
+            return failure("Unknown bank");
+        }
+        log.bank(name, rounded, balance.getAsDouble());
+        return new EconomyResponse(rounded, balance.getAsDouble(), ResponseType.SUCCESS, null);
     }
 
     @Override

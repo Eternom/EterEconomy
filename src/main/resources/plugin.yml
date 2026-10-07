@@ -5,5 +5,22 @@ main: fr.eternom.eterEconomy.Main
 api-version: '26.2'
 load: POSTWORLD
 authors: [ NadTum, JanjeVuk ]
-description: Économie du réseau (soldes et banques), fournie à Vault. Commandes dans EterEssential.
+description: Économie du réseau (soldes, banques, journal), fournie à Vault. Commandes des joueurs dans EterEssential.
 depend: [EterLib, Vault]
+
+commands:
+  ecostats:
+    description: Tableau de bord de l'économie (masse monétaire, sources, plus riches).
+    usage: /ecostats
+    aliases: [economystats]
+    permission: etereconomy.stats
+
+permissions:
+  etereconomy.stats:
+    description: Voir le tableau de bord de l'économie (/ecostats).
+    default: op
+  etereconomy.admin:
+    description: Toutes les permissions d'EterEconomy.
+    default: op
+    children:
+      etereconomy.stats: true

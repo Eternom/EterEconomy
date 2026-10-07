@@ -1,0 +1,56 @@
+# EterEconomy messages, MiniMessage format: https://docs.advntr.dev/minimessage/format
+# Palette tags (EterLib/config.yml > language.colors): <primary> <accent> <info> <error> <success>
+#   <info> = normal light gray text, <accent> = important words in orange.
+# Values between <> such as <amount> are filled in by the plugin. To show a literal "<", write \< inside 'single quotes'.
+# A missing key falls back to the plugin's built-in text: you only need to keep the lines you change.
+# The message prefix ("Core") is shared by all plugins: EterLib/config.yml > language.prefix.
+
+command:
+  players-only: "<error>This command can only be used by players."
+
+error:
+  generic: "<error>Something went wrong, please try again later."
+
+stats:
+  title: "<primary>Network economy"
+  back: "<accent>« Back"
+  period:
+    '1': "<accent>Today"
+    '7': "<accent>Last 7 days"
+    '30': "<accent>Last 30 days"
+    selected: "<success>● <info>Shown period"
+    click: "<accent>Click <dark_gray>· <info>show this period"
+  summary:
+    name: "<primary>Money supply: <accent><amount>"
+    accounts: "<dark_gray>▸ <info>Accounts: <accent><count>"
+    change-day: "<dark_gray>▸ <info>Over 24h: <accent><amount>"
+    change-week: "<dark_gray>▸ <info>Over 7 days: <accent><amount>"
+    unknown: "no record yet"
+    period: "<info>Over the period (<accent><period></accent>):"
+    created: "<dark_gray>▸ <info>Created: <success><amount>"
+    destroyed: "<dark_gray>▸ <info>Destroyed: <error><amount>"
+    net-up: "<dark_gray>▸ <info>Net: <success><amount></success> <dark_gray>(supply goes up)"
+    net-down: "<dark_gray>▸ <info>Net: <error><amount></error> <dark_gray>(supply goes down)"
+  source:
+    name: "<accent><source>"
+    none: "<info>No movement over this period"
+    created: "<dark_gray>▸ <info>Created: <success><amount>"
+    destroyed: "<dark_gray>▸ <info>Destroyed: <error><amount>"
+    operations: "<dark_gray>▸ <info>Operations: <accent><count>"
+    faucet: "<success>● <info>Creates money: <success><amount>"
+    sink: "<error>● <info>Destroys money: <error><amount>"
+    neutral: "<dark_gray>● <info>Neutral (money changes hands)"
+  supply:
+    button: "<accent>Supply day by day"
+    button-lore: "<info>The last 28 records"
+    title: "<primary>Money supply, day by day"
+    day: "<accent><date></accent> <dark_gray>· <info><amount>"
+    accounts: "<dark_gray>▸ <info>Accounts: <accent><count>"
+    change: "<dark_gray>▸ <info>Since the day before: <accent><amount>"
+  richest:
+    button: "<accent>Richest players"
+    button-lore: "<info>Spot an abnormal fortune"
+    title: "<primary>Richest players"
+    player: "<accent>#<rank></accent> <white><player>"
+    balance: "<dark_gray>▸ <info>Balance: <accent><amount>"
+    share: "<dark_gray>▸ <info>Share of the ranking: <accent><share>%"
