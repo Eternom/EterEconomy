@@ -36,15 +36,7 @@ ajouter de membres : le propriétaire est le seul membre. `banks.enabled: false`
 `config.yml` : `currency` (noms singulier et pluriel, décimales de 0 à 4, solde de départ) et `banks`
 (activées, solde de départ). Ne pas changer les décimales une fois le serveur ouvert.
 
-## Version 2.0.0
-
-Réécriture sur EterLib (Gradle, base et Redis communs). Abandonnés : les stockages YAML, SQLite et PostgreSQL, la
-copie « vivante » en mémoire et ses sauvegardes périodiques (inutiles quand la base est la source de vérité), les
-commandes `/eco` et `/bank` (les commandes vont dans EterEssential) et les variables PlaceholderAPI (l'extension
-Vault de PlaceholderAPI donne `%vault_eco_balance%`). Les anciennes tables `eter_balances`, `eter_banks`,
-`eter_bank_members` et les clés Redis `balances`, `banks`, `bank:*` ne sont plus utilisées.
-
-## Journal et statistiques (2.1.0)
+## Journal et statistiques
 
 **Journal** (`module/history/TransactionLog`, table `etereconomy_transactions`) : chaque mouvement réussi (joueur ou
 banque) avec montant signé, solde après, **source** et serveur. La source est le plugin qui a appelé Vault, trouvé
