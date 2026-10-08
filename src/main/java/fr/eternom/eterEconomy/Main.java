@@ -20,14 +20,14 @@ import java.time.DateTimeException;
 import java.time.ZoneId;
 
 /**
- * Économie du réseau, fournie à Vault : soldes et banques en base commune (etereconomy_*), Redis facultatif, et un
+ * Économie du réseau, fournie à Vault : soldes et banques en base commune (etereconomy_*), copie Redis, et un
  * journal de chaque mouvement pour suivre l'équilibre (/ecostats). Les commandes des joueurs (/money, /pay, /eco)
  * sont dans EterEssential.
  */
 public final class Main extends JavaPlugin {
 
     /** Version minimale d'EterLib : textes communs et outils partagés (Frame, Money, NetworkBus) depuis 1.6.0. */
-    private static final String REQUIRED_ETERLIB = "1.6.0";
+    private static final String REQUIRED_ETERLIB = "1.8.0";
 
     /** Préfixe des tables d'EterEconomy dans la base commune : etereconomy_balances, etereconomy_transactions... */
     private static final String TABLE_PREFIX = "etereconomy_";
@@ -77,7 +77,7 @@ public final class Main extends JavaPlugin {
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, maintenance::run, 60 * 20, MAINTENANCE_TICKS);
 
         new Commands(this);
-        getLogger().info("Économie fournie à Vault" + (lib.getRedis() != null ? " (copie des soldes dans Redis)" : "")
+        getLogger().info("Économie fournie à Vault (copie des soldes dans Redis)"
                 + (banks != null ? ", banques activées" : "") + ", journal des transactions actif");
     }
 

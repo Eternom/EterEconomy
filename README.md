@@ -7,7 +7,7 @@ plugin compatible Vault (boutiques...) fonctionne aussi. Document développeur, 
 
 ## Prérequis
 
-- **EterLib 1.6.0+** (`depend`, textes communs, cadre des menus, bus réseau, `Money`) : base de données, Redis (facultatif) et joueurs du réseau.
+- **EterLib 1.8.0+** (`depend`, textes communs, cadre des menus, bus réseau, `Money`) : base de données, Redis (obligatoire) et joueurs du réseau.
 - **Vault** (`depend`). EterEconomy s'enregistre avec la priorité haute : il l'emporte sur l'économie d'un autre
   plugin (Essentials...) installé en même temps.
 
@@ -16,10 +16,10 @@ plugin compatible Vault (boutiques...) fonctionne aussi. Document développeur, 
 **La base est la seule source de vérité** (`module/account/AccountRepository`, table `etereconomy_balances`) :
 - chaque mouvement est **une requête SQL relative**, atomique : `balance = ROUND(balance + ?, décimales)` pour un dépôt,
   `... balance - ? WHERE balance >= ?` pour un retrait. Deux serveurs ne peuvent pas s'écraser, un retrait ne passe
-  jamais en négatif, avec ou sans Redis ;
+  jamais en négatif ;
 - un compte inexistant vaut `currency.starting-balance` ; il est créé au premier mouvement (ou par `createPlayerAccount`) ;
-- **Redis (facultatif)** garde une copie des soldes lus (`economy:balance:<uuid>`, 1 min), **effacée à chaque
-  mouvement** : la lecture suivante repart de la base. Sans Redis, chaque lecture va en base.
+- **Redis** garde une copie des soldes lus (`economy:balance:<uuid>`, 1 min), **effacée à chaque
+  mouvement** : la lecture suivante repart de la base.
 
 **Les appels sont bloquants** (base, Redis) : les plugins appellent Vault hors du thread principal (c'est le cas de tous
 les plugins Eter). Les montants sont arrondis aux décimales de la monnaie ; un montant négatif ou invalide est refusé.
@@ -68,9 +68,9 @@ mesurable : un nombre fixe de quêtes par joueur et par jour.
 
 | Repère | Valeur |
 |---|---|
-| Une quête | **150 à 250 Heloks**, pour environ 15 à 20 minutes de jeu |
-| Par jour | 3 quêtes + 1 bonus (× 1,5) : **800 Heloks au plus** |
-| Par semaine, joueur très assidu | environ **5 600 Heloks** |
+| Une quête | **110 à 320 Heloks** selon le niveau (facile, normale, difficile), 10 à 30 minutes de jeu |
+| Par jour | 3 quêtes + 1 bonus (× 1,3) : **environ 850 Heloks** |
+| Par semaine, joueur très assidu | environ **6 000 Heloks** |
 | Changer de métier | **2 000 Heloks** (évier), une fois par semaine au plus |
 
 **Les éviers** :
@@ -80,7 +80,7 @@ mesurable : un nombre fixe de quêtes par joueur et par jour.
 
 **La règle d'or des prix en boutique** : le prix **à l'unité** d'un objet en boutique doit toujours être **supérieur**
 à ce que sa livraison rapporte à l'unité. Sinon, on l'achète pour le livrer, et on imprime de l'argent sans fin.
-Les éditeurs d'EterMarket l'affichent en rouge (⚠) quand ce n'est pas le cas. Exemple : une quête de 64 charbons à
+L'éditeur de boutique d'EterMarket l'affiche en rouge (⚠) quand ce n'est pas le cas. Exemple : une quête de 64 charbons à
 150 Heloks rapporte 2,34 par charbon, donc la boutique doit le vendre plus cher que 2,34 l'unité.
 
 **Les récompenses gratuites** (`/daily`, votes…) : au plus **environ 10 % du revenu** d'un joueur assidu, soit un cycle

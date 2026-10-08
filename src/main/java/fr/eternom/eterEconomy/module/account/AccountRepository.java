@@ -14,8 +14,8 @@ import java.util.UUID;
  * Soldes des joueurs, table etereconomy_balances : la base est la seule source de vérité.
  *
  * Chaque mouvement est UNE requête SQL relative ("balance + 50", "balance - 50 si balance >= 50") : deux serveurs ne
- * peuvent pas s'écraser et un retrait ne passe jamais en négatif, avec ou sans Redis.
- * Redis (facultatif) garde une copie des soldes lus, effacée à chaque mouvement : la prochaine lecture repart de la base.
+ * peuvent pas s'écraser et un retrait ne passe jamais en négatif.
+ * Redis garde une copie des soldes lus, effacée à chaque mouvement : la prochaine lecture repart de la base.
  * Appels bloquants : hors du thread principal (les plugins appellent Vault depuis une tâche de fond).
  */
 public class AccountRepository {
@@ -24,7 +24,7 @@ public class AccountRepository {
     private static final Duration CACHE_TTL = Duration.ofMinutes(1);
 
     private final Database database;
-    private final RedisCache redis; // null sans Redis
+    private final RedisCache redis;
     private final double startingBalance;
     private final int fractionalDigits;
 
@@ -77,16 +77,12 @@ public class AccountRepository {
     }
 
     private Optional<Double> find(UUID player) {
-        if (redis != null) {
-            Optional<String> cached = redis.get(key(player));
-            if (cached.isPresent()) {
-                return Optional.of(Double.parseDouble(cached.get()));
-            }
+        Optional<String> cached = redis.get(key(player));
+        if (cached.isPresent()) {
+            return Optional.of(Double.parseDouble(cached.get()));
         }
         Optional<Double> stored = database.getFirst(TABLE, Map.of("uuid", player)).map(row -> row.getDouble("balance"));
-        if (redis != null) {
-            stored.ifPresent(balance -> redis.set(key(player), String.valueOf(balance), CACHE_TTL));
-        }
+        stored.ifPresent(balance -> redis.set(key(player), String.valueOf(balance), CACHE_TTL));
         return stored;
     }
 
@@ -97,9 +93,7 @@ public class AccountRepository {
     }
 
     private void invalidate(UUID player) {
-        if (redis != null) {
-            redis.delete(key(player));
-        }
+        redis.delete(key(player));
     }
 
     /** Arrondi fait par la base, aux décimales de la monnaie (évite les 0,30000000004). */
