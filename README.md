@@ -77,6 +77,10 @@ mesurable : un nombre fixe de quêtes par joueur et par jour.
 - **les boutiques des PNJ**, qui ne font que vendre ;
 - **l'hôtel des ventes** : 5 % de taxe sur chaque vente et 1 % de frais de mise en vente, non remboursés ;
 - **le changement de métier**.
+- **les clans** (EterClan) : création (1 000), chunks au-delà des 9 gratuits (250, puis +7 % par chunk, plafond × 15) et
+  leur entretien hebdomadaire (20, même courbe) : ~275/semaine pour 10 chunks en plus, ~4 000 pour 40 ;
+- **la mort** (EterEssential) : 5 % de l'argent sur soi. La banque d'un clan protège, contre un intérêt versé à la
+  réserve du clan (pas un évier : l'argent reste dans le clan).
 
 **La règle d'or des prix en boutique** : le prix **à l'unité** d'un objet en boutique doit toujours être **supérieur**
 à ce que sa livraison rapporte à l'unité. Sinon, on l'achète pour le livrer, et on imprime de l'argent sans fin.
