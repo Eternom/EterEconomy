@@ -7,7 +7,7 @@ plugin compatible Vault (boutiques...) fonctionne aussi. Document développeur, 
 
 ## Prérequis
 
-- **EterLib 1.8.0+** (`depend`, textes communs, cadre des menus, bus réseau, `Money`) : base de données, Redis (obligatoire) et joueurs du réseau.
+- **EterLib 1.10.0+** (`depend`, textes communs, cadre des menus, bus réseau, `Money`) : base de données, Redis (obligatoire) et joueurs du réseau.
 - **Vault** (`depend`). EterEconomy s'enregistre avec la priorité haute : il l'emporte sur l'économie d'un autre
   plugin (Essentials...) installé en même temps.
 
@@ -95,3 +95,17 @@ de `/daily` d'environ **600 à 750 Heloks**, objets compris.
   ajouter des éviers (taxes, coût de services comme `/rtp`, réparations) ;
 - une source qui crée beaucoup plus que prévu : prix mal réglé ou faille ;
 - un joueur qui pèse une part démesurée du classement des plus riches : à vérifier.
+
+## API (pour les plugins Eter)
+
+`fr.eternom.eterEconomy.api.EconomyApi` (`EconomyApi.get()`), la même économie que Vault, mais chaque mouvement donne
+sa **source** (« EterMarket · boutique », « EterClan · loyer »...), écrite telle quelle dans le journal et les totaux du
+jour de `/ecostats`. Les plugins Eter passent par elle ; les plugins tiers gardent Vault (leur source est devinée dans la
+pile d'appels). Bloquant : hors du thread principal.
+
+- `balance`, `has`, `format`, `round` ;
+- `withdraw(joueur, montant, source)` (une seule requête, jamais de solde négatif), `deposit`, `transfer` (remboursé si
+  le versement échoue).
+
+Tables de l'ancien EterEconomy 1.x (`eter_balances`, `eter_banks`, `eter_bank_members`) : supprimées au démarrage
+(temporaire, retiré dans une prochaine version).

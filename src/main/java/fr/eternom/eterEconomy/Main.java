@@ -1,5 +1,6 @@
 package fr.eternom.eterEconomy;
 
+import fr.eternom.eterEconomy.api.EconomyApi;
 import fr.eternom.eterEconomy.listeners.Commands;
 import fr.eternom.eterEconomy.module.account.AccountRepository;
 import fr.eternom.eterEconomy.module.bank.BankRepository;
@@ -27,7 +28,7 @@ import java.time.ZoneId;
 public final class Main extends JavaPlugin {
 
     /** Version minimale d'EterLib : textes communs et outils partagés (Frame, Money, NetworkBus) depuis 1.6.0. */
-    private static final String REQUIRED_ETERLIB = "1.8.0";
+    private static final String REQUIRED_ETERLIB = "1.10.0";
 
     /** Préfixe des tables d'EterEconomy dans la base commune : etereconomy_balances, etereconomy_transactions... */
     private static final String TABLE_PREFIX = "etereconomy_";
@@ -52,6 +53,9 @@ public final class Main extends JavaPlugin {
         EterLib lib = EterLib.get();
         messages = lib.messages(this, "en_us", "fr_fr");
         Database database = lib.database(TABLE_PREFIX);
+        // Tables de l'ancien EterEconomy 1.x (l'argent est reparti de zéro en 2.0) : retirées, pas de table morte.
+        // TEMPORAIRE : à enlever une fois cette version installée partout.
+        database.execute("DROP TABLE IF EXISTS eter_balances, eter_banks, eter_bank_members");
         ZoneId zone = zone();
 
         int digits = Math.clamp(getConfig().getInt("currency.fractional-digits", 0), 0, 4);
@@ -67,6 +71,8 @@ public final class Main extends JavaPlugin {
                 getConfig().getString("currency.name-plural", "Heloks"), digits);
         // Priorité haute : EterEconomy l'emporte sur l'économie d'un autre plugin (Essentials...) si les deux sont installés
         Bukkit.getServicesManager().register(Economy.class, economy, this, ServicePriority.High);
+        // API des plugins Eter (EconomyApi.get()) : la même économie, chaque mouvement avec sa source
+        Bukkit.getServicesManager().register(EconomyApi.class, economy, this, ServicePriority.Normal);
 
         EconomyStats economyStats = new EconomyStats(database, zone, banks != null);
         stats = new StatsGui(this, economyStats, lib.getPlayers(), economy, messages,

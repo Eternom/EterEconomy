@@ -20,8 +20,8 @@ import java.util.logging.Level;
  * ventes au serveur...) et combien il en DÉTRUIT (retraits : achats au serveur, taxes...). Un /pay apparaît des deux
  * côtés (retrait puis dépôt) : il ne crée rien.
  *
- * La source est le plugin qui a appelé Vault, trouvé automatiquement dans la pile d'appels : les plugins n'ont rien à
- * faire. Appels bloquants (base), déjà hors du thread principal comme tout appel à Vault ; une erreur d'écriture du
+ * La source : donnée par les plugins Eter (EconomyApi, « EterMarket · boutique ») ; pour un plugin tiers passé par
+ * Vault, le plugin trouvé dans la pile d'appels. Appels bloquants (base), déjà hors du thread principal comme tout appel à Vault ; une erreur d'écriture du
  * journal ne bloque jamais le mouvement lui-même.
  */
 public class TransactionLog {
@@ -60,21 +60,25 @@ public class TransactionLog {
                 Column.of("operations", Column.Type.INT).notNull());
     }
 
-    /** Mouvement d'un joueur. amount : positif pour un dépôt, négatif pour un retrait. */
+    /** Mouvement d'un joueur par Vault (source devinée). amount : positif pour un dépôt, négatif pour un retrait. */
     public void player(UUID player, double amount, double balanceAfter) {
-        record(player, null, amount, balanceAfter);
+        record(player, null, amount, balanceAfter, callerPlugin());
+    }
+
+    /** Mouvement d'un joueur par EconomyApi : la source est donnée par le plugin (« EterMarket · boutique »). */
+    public void player(UUID player, double amount, double balanceAfter, String source) {
+        record(player, null, amount, balanceAfter, source.length() > 64 ? source.substring(0, 64) : source);
     }
 
     /** Mouvement d'une banque de Vault. */
     public void bank(String bank, double amount, double balanceAfter) {
-        record(null, bank, amount, balanceAfter);
+        record(null, bank, amount, balanceAfter, callerPlugin());
     }
 
-    private void record(UUID player, String bank, double amount, double balanceAfter) {
+    private void record(UUID player, String bank, double amount, double balanceAfter, String source) {
         if (amount == 0) {
             return;
         }
-        String source = callerPlugin();
         long now = System.currentTimeMillis();
         try {
             Map<String, Object> values = new HashMap<>(); // HashMap : uuid ou bank vaut null

@@ -1,5 +1,6 @@
 plugins {
     id("java-library")
+    id("maven-publish")
 }
 
 repositories {
@@ -16,7 +17,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:26.2.build.129-stable")
 
     // Socle commun : base, Redis, joueurs du réseau (plugin EterLib installé sur le serveur)
-    compileOnly("com.github.Eternom:EterLib:1.8.0")
+    compileOnly("com.github.Eternom:EterLib:1.10.3")
     // EterEconomy est le fournisseur d'économie de Vault
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") {
         exclude(group = "org.bukkit")
@@ -55,3 +56,13 @@ val deployPlugin by tasks.registering(Copy::class) {
     }
 }
 tasks.build { finalizedBy(deployPlugin) }
+
+// Publié pour les autres plugins (son API, fr.eternom.eterEconomy.api) : compileOnly("com.github.Eternom:EterEconomy:<tag>")
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            artifactId = "EterEconomy"
+            from(components["java"])
+        }
+    }
+}

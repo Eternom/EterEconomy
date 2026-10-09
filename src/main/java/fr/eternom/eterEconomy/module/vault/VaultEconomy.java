@@ -1,5 +1,6 @@
 package fr.eternom.eterEconomy.module.vault;
 
+import fr.eternom.eterEconomy.api.EconomyApi;
 import fr.eternom.eterEconomy.module.account.AccountRepository;
 import fr.eternom.eterEconomy.module.bank.BankRepository;
 import fr.eternom.eterEconomy.module.history.TransactionLog;
@@ -28,7 +29,7 @@ import java.util.UUID;
  * ({@link TransactionLog}).
  */
 @SuppressWarnings("deprecation") // Vault impose aussi ses anciennes signatures (pseudo, monde)
-public class VaultEconomy implements Economy {
+public class VaultEconomy implements Economy, EconomyApi {
 
     private static final String INVALID_AMOUNT = "Invalid amount";
     private static final String UNKNOWN_PLAYER = "Unknown player";
@@ -89,6 +90,52 @@ public class VaultEconomy implements Economy {
     @Override
     public String currencyNameSingular() {
         return singular;
+    }
+
+    // ---------- EconomyApi (plugins Eter : la source est donnée) ----------
+
+    @Override
+    public double balance(UUID player) {
+        return accounts.balance(player);
+    }
+
+    @Override
+    public boolean has(UUID player, double amount) {
+        return accounts.balance(player) >= amount;
+    }
+
+    @Override
+    public boolean withdraw(UUID player, double amount, String source) {
+        double rounded = round(amount);
+        if (rounded < 0) {
+            return false;
+        }
+        OptionalDouble balance = accounts.withdraw(player, rounded);
+        balance.ifPresent(after -> log.player(player, -rounded, after, source));
+        return balance.isPresent();
+    }
+
+    @Override
+    public boolean deposit(UUID player, double amount, String source) {
+        double rounded = round(amount);
+        if (rounded < 0) {
+            return false;
+        }
+        log.player(player, rounded, accounts.deposit(player, rounded), source);
+        return true;
+    }
+
+    @Override
+    public boolean transfer(UUID from, UUID to, double amount, String source) {
+        if (!withdraw(from, amount, source)) {
+            return false;
+        }
+        try {
+            return deposit(to, amount, source);
+        } catch (RuntimeException e) {
+            deposit(from, amount, source); // versement raté : rendu
+            throw e;
+        }
     }
 
     // ---------- Comptes des joueurs ----------
@@ -353,7 +400,8 @@ public class VaultEconomy implements Economy {
     // ---------- Outils ----------
 
     /** Arrondi aux décimales de la monnaie ; -1 si le montant n'est pas un nombre valide. */
-    private double round(double amount) {
+    @Override
+    public double round(double amount) {
         if (!Double.isFinite(amount) || amount < 0) {
             return -1;
         }
