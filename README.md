@@ -106,6 +106,3 @@ pile d'appels). Bloquant : hors du thread principal.
 - `balance`, `has`, `format`, `round` ;
 - `withdraw(joueur, montant, source)` (une seule requête, jamais de solde négatif), `deposit`, `transfer` (remboursé si
   le versement échoue).
-
-Tables de l'ancien EterEconomy 1.x (`eter_balances`, `eter_banks`, `eter_bank_members`) : supprimées au démarrage
-(temporaire, retiré dans une prochaine version).

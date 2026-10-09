@@ -53,9 +53,6 @@ public final class Main extends JavaPlugin {
         EterLib lib = EterLib.get();
         messages = lib.messages(this, "en_us", "fr_fr");
         Database database = lib.database(TABLE_PREFIX);
-        // Tables de l'ancien EterEconomy 1.x (l'argent est reparti de zéro en 2.0) : retirées, pas de table morte.
-        // TEMPORAIRE : à enlever une fois cette version installée partout.
-        database.execute("DROP TABLE IF EXISTS eter_balances, eter_banks, eter_bank_members");
         ZoneId zone = zone();
 
         int digits = Math.clamp(getConfig().getInt("currency.fractional-digits", 0), 0, 4);
