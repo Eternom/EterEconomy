@@ -5,6 +5,7 @@ import fr.eternom.eterLib.helper.sql.Column;
 import fr.eternom.eterLib.helper.sql.Database;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -69,6 +70,22 @@ public class AccountRepository {
                 + " WHERE uuid = ? AND balance >= ?", amount, player, amount);
         double balance = reload(player);
         return updated > 0 ? OptionalDouble.of(balance) : OptionalDouble.empty();
+    }
+
+    /** Les plus riches, du premier au dernier (classements). */
+    public List<fr.eternom.eterEconomy.api.EconomyApi.Ranked> richest(int limit) {
+        return database.query("SELECT uuid, balance FROM " + table() + " ORDER BY balance DESC LIMIT ?", limit).stream()
+                .map(row -> new fr.eternom.eterEconomy.api.EconomyApi.Ranked(row.getUUID("uuid"), row.getDouble("balance")))
+                .toList();
+    }
+
+    /** Place du joueur (1 = le plus riche), 0 sans compte. */
+    public int rank(UUID player) {
+        if (find(player).isEmpty()) {
+            return 0;
+        }
+        return (int) database.query("SELECT COUNT(*) AS above FROM " + table() + " WHERE balance > (SELECT balance FROM " + table()
+                + " WHERE uuid = ?)", player).getFirst().getLong("above") + 1;
     }
 
     public void set(UUID player, double amount) {

@@ -2,6 +2,7 @@ package fr.eternom.eterEconomy.api;
 
 import org.bukkit.Bukkit;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,4 +44,14 @@ public interface EconomyApi {
 
     /** De from à to : retiré puis versé ; si le versement échoue, from est remboursé. false si from n'a pas assez. */
     boolean transfer(UUID from, UUID to, double amount, String source);
+
+    /** Un joueur et sa valeur dans un classement. */
+    record Ranked(UUID player, double value) {
+    }
+
+    /** Les plus riches (solde), du premier au dernier. Bloquant. */
+    List<Ranked> richest(int limit);
+
+    /** Place du joueur dans le classement des plus riches (1 = premier), 0 s'il n'a pas de compte. Bloquant. */
+    int wealthRank(UUID player);
 }

@@ -126,6 +126,16 @@ public class VaultEconomy implements Economy, EconomyApi {
     }
 
     @Override
+    public List<Ranked> richest(int limit) {
+        return accounts.richest(limit);
+    }
+
+    @Override
+    public int wealthRank(UUID player) {
+        return accounts.rank(player);
+    }
+
+    @Override
     public boolean transfer(UUID from, UUID to, double amount, String source) {
         if (!withdraw(from, amount, source)) {
             return false;

@@ -106,3 +106,4 @@ pile d'appels). Bloquant : hors du thread principal.
 - `balance`, `has`, `format`, `round` ;
 - `withdraw(joueur, montant, source)` (une seule requête, jamais de solde négatif), `deposit`, `transfer` (remboursé si
   le versement échoue).
+- `richest(n)`, `wealthRank(joueur)` : classement des plus riches (pour `/classement` d'EterReward).
