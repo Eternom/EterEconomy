@@ -1,5 +1,6 @@
 package fr.eternom.eterEconomy.module.account;
 
+import fr.eternom.eterEconomy.api.EconomyApi;
 import fr.eternom.eterLib.helper.cache.RedisCache;
 import fr.eternom.eterLib.helper.sql.Column;
 import fr.eternom.eterLib.helper.sql.Database;
@@ -73,9 +74,9 @@ public class AccountRepository {
     }
 
     /** Les plus riches, du premier au dernier (classements). */
-    public List<fr.eternom.eterEconomy.api.EconomyApi.Ranked> richest(int limit) {
+    public List<EconomyApi.Ranked> richest(int limit) {
         return database.query("SELECT uuid, balance FROM " + table() + " ORDER BY balance DESC LIMIT ?", limit).stream()
-                .map(row -> new fr.eternom.eterEconomy.api.EconomyApi.Ranked(row.getUUID("uuid"), row.getDouble("balance")))
+                .map(row -> new EconomyApi.Ranked(row.getUUID("uuid"), row.getDouble("balance")))
                 .toList();
     }
 
