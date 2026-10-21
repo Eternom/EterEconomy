@@ -24,7 +24,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:26.2.build.129-stable")
 
     // Socle commun : base, Redis, joueurs du réseau (plugin EterLib installé sur le serveur)
-    compileOnly("com.github.Eternom:EterLib:1.10.3")
+    compileOnly("com.github.Eternom:EterLib:1.20.1")
     // EterEconomy est le fournisseur d'économie de Vault
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") {
         exclude(group = "org.bukkit")
