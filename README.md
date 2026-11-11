@@ -56,13 +56,13 @@ en détruit), la masse jour par jour sur 28 jours, les 28 plus riches (fortune a
 
 ## Repères économiques
 
-Grille pour régler tous les prix et récompenses (EterMarket, EterReward). À ajuster avec `/ecostats`.
+Grille pour régler tous les prix et récompenses (EterJob, EterReward). À ajuster avec `/ecostats`.
 
 **Principe** : l'argent entre par des **robinets** et sort par des **éviers**. Si les robinets l'emportent
 durablement, la masse monétaire gonfle : les prix entre joueurs s'envolent et les récompenses ne valent plus rien
 (inflation). Objectif : une masse qui ne monte que doucement, au rythme des nouveaux joueurs.
 
-**Le robinet principal : les quêtes de la guilde des métiers** (EterMarket). Les boutiques du serveur **ne rachètent
+**Le robinet principal : les quêtes de la guilde des métiers** (EterJob). Les boutiques du serveur **ne rachètent
 rien** : on ne gagne de l'argent qu'en livrant ses quêtes du jour au PNJ de son métier. Le robinet est donc fermé et
 mesurable : un nombre fixe de quêtes par joueur et par jour.
 
