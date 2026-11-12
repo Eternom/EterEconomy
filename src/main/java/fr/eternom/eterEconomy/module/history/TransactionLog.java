@@ -8,10 +8,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 /**
@@ -35,6 +37,19 @@ public class TransactionLog {
     private final Database database;
     private final String serverName;
     private final ZoneId zone;
+    /** Gains de l'heure en cours par joueur (sans les /pay, qui ne créent rien) : alerte au-delà d'un seuil. */
+    private final Map<UUID, double[]> hourlyGains = new ConcurrentHashMap<>();
+    private double gainAlert;
+    private Consumer<GainAlert> onGainAlert = alert -> { };
+
+    /** Un joueur a gagné plus que le seuil en moins d'une heure. */
+    public record GainAlert(UUID player, double amount, String lastSource) {
+    }
+
+    /** Une ligne du journal d'un joueur, pour /transactions. */
+    public record Entry(double amount, double balance, String source, String server, long createdAt) {
+    }
+
     /** Classe -> plugin qui l'a chargée : la recherche n'est faite qu'une fois par classe. */
     private final Map<Class<?>, Optional<String>> owners = new ConcurrentHashMap<>();
 
@@ -60,6 +75,21 @@ public class TransactionLog {
                 Column.of("operations", Column.Type.INT).notNull());
     }
 
+    /** Seuil d'alerte (Heloks gagnés en une heure, 0 : jamais) et ce qu'on fait de l'alerte (appelé hors du thread principal). */
+    public void watchGains(double threshold, Consumer<GainAlert> onAlert) {
+        this.gainAlert = threshold;
+        this.onGainAlert = onAlert;
+    }
+
+    /** Bloquant (base) : les derniers mouvements d'un joueur, du plus récent au plus ancien. */
+    public List<Entry> recent(UUID player, int limit) {
+        return database.query("SELECT amount, balance, source, server, created_at FROM " + database.table(TRANSACTIONS)
+                        + " WHERE uuid = ? ORDER BY id DESC LIMIT " + limit, player).stream()
+                .map(row -> new Entry(row.getDouble("amount"), row.getDouble("balance"), row.getString("source"),
+                        row.getString("server"), row.getLong("created_at")))
+                .toList();
+    }
+
     /** Mouvement d'un joueur par Vault (source devinée). amount : positif pour un dépôt, négatif pour un retrait. */
     public void player(UUID player, double amount, double balanceAfter) {
         record(player, null, amount, balanceAfter, callerPlugin());
@@ -80,6 +110,9 @@ public class TransactionLog {
             return;
         }
         long now = System.currentTimeMillis();
+        if (player != null && amount > 0 && gainAlert > 0 && !source.contains("/pay")) {
+            watch(player, amount, source, now);
+        }
         try {
             Map<String, Object> values = new HashMap<>(); // HashMap : uuid ou bank vaut null
             values.put("uuid", player);
@@ -99,6 +132,21 @@ public class TransactionLog {
                     LocalDate.now(zone).toEpochDay(), source, created, destroyed, created, destroyed);
         } catch (RuntimeException e) {
             plugin.getLogger().log(Level.WARNING, "Mouvement non journalisé (" + source + ", " + amount + ")", e);
+        }
+    }
+
+    /** Cumul sur une fenêtre d'une heure ; une seule alerte par fenêtre. */
+    private void watch(UUID player, double amount, String source, long now) {
+        double[] window = hourlyGains.compute(player, (uuid, old) -> {
+            if (old == null || now - old[0] > 3_600_000L) {
+                return new double[]{now, amount, 0};
+            }
+            old[1] += amount;
+            return old;
+        });
+        if (window[2] == 0 && window[1] >= gainAlert) {
+            window[2] = 1;
+            onGainAlert.accept(new GainAlert(player, window[1], source));
         }
     }
 

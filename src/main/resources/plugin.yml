@@ -15,7 +15,18 @@ commands:
     aliases: [economystats]
     permission: etereconomy.stats
 
+  transactions:
+    description: Les 15 derniers mouvements de ton argent.
+    usage: /transactions
+    permission: etereconomy.history
+
 permissions:
+  etereconomy.history:
+    description: Voir ses derniers mouvements d'argent (/transactions).
+    default: true
+  etereconomy.alerts:
+    description: Recevoir les alertes de gains anormaux.
+    default: op
   etereconomy.stats:
     description: Voir le tableau de bord de l'économie (/ecostats).
     default: op
@@ -24,3 +35,4 @@ permissions:
     default: op
     children:
       etereconomy.stats: true
+      etereconomy.alerts: true

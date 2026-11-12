@@ -13,5 +13,8 @@ public class Commands {
         PluginCommand stats = Objects.requireNonNull(main.getCommand("ecostats"), "Commande absente du plugin.yml : ecostats");
         stats.setExecutor(new StatsCommand(main.getStats(), main.getMessages()));
         stats.setTabCompleter((sender, command, label, args) -> List.of());
+        PluginCommand history = Objects.requireNonNull(main.getCommand("transactions"), "Commande absente du plugin.yml : transactions");
+        history.setExecutor(main.getHistory());
+        history.setTabCompleter((sender, command, label, args) -> List.of());
     }
 }

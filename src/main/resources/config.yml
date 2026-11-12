@@ -4,7 +4,7 @@
 #
 #  L'économie du réseau, fournie à Vault : tous les plugins (EterEssential pour
 #  /money et /pay, EterTab pour la sidebar, boutiques...) passent par elle.
-#  Base de données et Redis : EterLib/config.yml. Une seule commande, admin : /ecostats.
+#  Base de données et Redis : EterLib/config.yml. Commandes : /ecostats (admin), /transactions (joueurs).
 #  Les soldes sont en base (etereconomy_balances), commune à tous les serveurs.
 #  Toute modification nécessite un redémarrage du serveur.
 
@@ -33,6 +33,11 @@ history:
   # d'abord archivées dans plugins/EterEconomy/archives/ (CSV compressé), puis supprimées.
   # Les totaux par jour et l'évolution de la masse monétaire sont gardés pour toujours.
   retention-days: 365
+
+# Alerte quand un joueur gagne plus que ce montant en moins d'une heure (hors /pay, qui ne crée rien) : un
+# avertissement dans la console et un message au staff connecté (etereconomy.alerts). 0 : pas d'alerte.
+alerts:
+  hourly-gain: 100000
 
 # Menus : bouton en bas du menu. Avec une commande (sans le /), il la lance pour le joueur et relie
 # les menus entre eux (ex : "profile" pour revenir au menu du profil) ; vide, il ferme le menu.

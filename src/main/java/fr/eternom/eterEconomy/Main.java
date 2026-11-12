@@ -6,6 +6,7 @@ import fr.eternom.eterEconomy.module.account.AccountRepository;
 import fr.eternom.eterEconomy.module.bank.BankRepository;
 import fr.eternom.eterEconomy.module.history.EconomyStats;
 import fr.eternom.eterEconomy.module.history.HistoryMaintenance;
+import fr.eternom.eterEconomy.module.history.HistoryCommand;
 import fr.eternom.eterEconomy.module.history.TransactionLog;
 import fr.eternom.eterEconomy.module.stats.StatsGui;
 import fr.eternom.eterEconomy.module.vault.VaultEconomy;
@@ -36,6 +37,7 @@ public final class Main extends JavaPlugin {
 
     private Messages messages;
     private StatsGui stats;
+    private HistoryCommand history;
 
     @Override
     public void onEnable() {
@@ -79,6 +81,17 @@ public final class Main extends JavaPlugin {
         // Relevé de la masse monétaire et archivage : une minute après le démarrage, puis toutes les heures
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, maintenance::run, 60 * 20, MAINTENANCE_TICKS);
 
+        // Gains anormaux : plus de alerts.hourly-gain en une heure (hors /pay) -> console et staff connecté ici
+        double threshold = Math.max(0, getConfig().getDouble("alerts.hourly-gain", 100000));
+        log.watchGains(threshold, alert -> Bukkit.getScheduler().runTask(this, () -> {
+            String name = java.util.Objects.requireNonNullElse(Bukkit.getOfflinePlayer(alert.player()).getName(), alert.player().toString());
+            String amount = fr.eternom.eterLib.helper.economy.Money.format(alert.amount());
+            getLogger().warning("Gains anormaux : " + name + " a gagné " + amount + " en moins d'une heure (dernier : " + alert.lastSource() + ")");
+            Bukkit.getOnlinePlayers().stream().filter(staff -> staff.hasPermission("etereconomy.alerts")).forEach(staff ->
+                    messages.send(staff, "alert.gain", "player", name, "amount", amount, "source", alert.lastSource()));
+        }));
+        history = new HistoryCommand(this, log, messages, zone);
+
         new Commands(this);
         getLogger().info("Économie fournie à Vault (copie des soldes dans Redis)"
                 + (banks != null ? ", banques activées" : "") + ", journal des transactions actif");
@@ -102,6 +115,10 @@ public final class Main extends JavaPlugin {
 
     public Messages getMessages() {
         return messages;
+    }
+
+    public HistoryCommand getHistory() {
+        return history;
     }
 
     public StatsGui getStats() {

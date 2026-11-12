@@ -49,3 +49,14 @@ stats:
     player: "<accent>#<rank></accent> <white><player>"
     balance: "<dark_gray>▸ <info>Balance: <accent><amount>"
     share: "<dark_gray>▸ <info>Share of the ranking: <accent><share>%"
+
+# /transactions: the latest money movements
+history:
+  empty: "<info>No money movement yet."
+  header: "<info>Your last <accent><count></accent> movements <dark_gray>(newest first)</dark_gray>:"
+  in: "<dark_gray><date> <success>+<amount></success> <info><source> <dark_gray>· balance <balance>"
+  out: "<dark_gray><date> <error>-<amount></error> <info><source> <dark_gray>· balance <balance>"
+
+# Staff alert (etereconomy.alerts)
+alert:
+  gain: "<error>[Economy]</error> <accent><player></accent> <info>earned <accent><amount></accent> in less than an hour <dark_gray>(last gain: <source>)"
